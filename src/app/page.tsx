@@ -20,11 +20,12 @@ import { PlanningPage } from "@/components/pages/PlanningPage";
 import { DocsViewer } from "@/components/pages/DocsViewer";
 import { ModalContainer } from "@/components/ui/Modal";
 import { NotificationPanel } from "@/components/layout/NotificationPanel";
+import { LoginModal } from "@/components/features/auth/LoginModal";
 import { useState, useEffect, useCallback } from "react";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 export default function Home() {
-  const { currentPage, sidebarOpen, toggleSidebar } = useAppState();
+  const { currentPage, sidebarOpen, toggleSidebar, loginOpen, setLoginOpen, setCurrentUser } = useAppState();
   const [isLoaded, setIsLoaded] = useState(false);
   const isMobile = useIsMobile();
 
@@ -82,6 +83,7 @@ export default function Home() {
 
       <ModalContainer />
       <NotificationPanel />
+      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} onLogin={setCurrentUser} />
     </div>
   );
 }

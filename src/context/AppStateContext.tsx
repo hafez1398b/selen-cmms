@@ -18,6 +18,12 @@ export type PageId =
   | "planning"
   | "docs";
 
+interface CurrentUser {
+  username: string;
+  name: string;
+  role: string;
+}
+
 interface AppStateContextType {
   currentPage: PageId;
   setCurrentPage: (page: PageId) => void;
@@ -33,6 +39,10 @@ interface AppStateContextType {
   triggerRefresh: () => void;
   notificationPanelOpen: boolean;
   toggleNotificationPanel: () => void;
+  currentUser: CurrentUser | null;
+  setCurrentUser: (u: CurrentUser | null) => void;
+  loginOpen: boolean;
+  setLoginOpen: (v: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextType>({
@@ -50,16 +60,22 @@ const AppStateContext = createContext<AppStateContextType>({
   triggerRefresh: () => {},
   notificationPanelOpen: false,
   toggleNotificationPanel: () => {},
+  currentUser: null,
+  setCurrentUser: () => {},
+  loginOpen: false,
+  setLoginOpen: () => {},
 });
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [currentPage, setCurrentPage] = useState<PageId>("assets");
+  const [currentPage, setCurrentPage] = useState<PageId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedItem, setSelectedItem] = useState<Record<string, any> | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
   const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
@@ -82,6 +98,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         triggerRefresh,
         notificationPanelOpen,
         toggleNotificationPanel,
+        currentUser,
+        setCurrentUser,
+        loginOpen,
+        setLoginOpen,
       }}
     >
       {children}

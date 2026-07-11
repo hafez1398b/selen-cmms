@@ -2,11 +2,11 @@
 
 import { useTheme } from "@/context/ThemeContext";
 import { useAppState } from "@/context/AppStateContext";
-import { Sun, Moon, Bell, Calendar, Menu } from "lucide-react";
+import { Sun, Moon, Bell, Calendar, Menu, LogIn, User, LogOut } from "lucide-react";
 
 export function TopHeader() {
   const { theme, toggleTheme } = useTheme();
-  const { toggleSidebar, currentPage, toggleNotificationPanel } = useAppState();
+  const { toggleSidebar, currentPage, toggleNotificationPanel, currentUser, setLoginOpen, setCurrentUser } = useAppState();
   const isDark = theme === 'dark';
 
   const persianDate = new Date().toLocaleDateString('fa-IR', {
@@ -93,6 +93,25 @@ export function TopHeader() {
         >
           {isDark ? <Sun className="w-4.5 h-4.5 text-amber-500" /> : <Moon className="w-4.5 h-4.5 text-gray-600" />}
         </button>
+
+        {/* User Profile / Login */}
+        {currentUser ? (
+          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-1.5">
+            <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-[10px] font-bold text-[#0a0a0a]">
+              {currentUser.name.charAt(0)}
+            </div>
+            <div className="hidden md:block">
+              <p className="text-[11px] font-bold text-amber-600 dark:text-amber-500">{currentUser.name}</p>
+            </div>
+            <button onClick={() => setCurrentUser(null)} className="p-1 rounded hover:bg-red-500/10 text-red-500" title="خروج">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setLoginOpen(true)} className="btn-primary text-xs !py-1.5">
+            <LogIn className="w-3.5 h-3.5" /> ورود
+          </button>
+        )}
       </div>
 
     </header>
