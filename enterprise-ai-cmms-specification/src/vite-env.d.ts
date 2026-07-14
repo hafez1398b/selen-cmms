@@ -1,0 +1,37 @@
+/// <reference types="vite/client" />
+
+declare module '*.png' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.jpg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.jpeg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.svg' {
+  const src: string;
+  export default src;
+}
+
+declare module 'jalaali-js' {
+  export function toJalaali(gy: number, gm: number, gd: number): { jy: number; jm: number; jd: number };
+  export function toGregorian(jy: number, jm: number, jd: number): { gy: number; gm: number; gd: number };
+  export function isValidJalaaliDate(jy: number, jm: number, jd: number): boolean;
+  export function isLeapJalaaliYear(jy: number): boolean;
+  export function jalaaliMonthLength(jy: number, jm: number): number;
+  const _default: {
+    toJalaali: typeof toJalaali;
+    toGregorian: typeof toGregorian;
+    isValidJalaaliDate: typeof isValidJalaaliDate;
+    isLeapJalaaliYear: typeof isLeapJalaaliYear;
+    jalaaliMonthLength: typeof jalaaliMonthLength;
+  };
+  export default _default;
+}

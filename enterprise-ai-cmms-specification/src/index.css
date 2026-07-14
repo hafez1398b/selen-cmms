@@ -1,0 +1,383 @@
+@import "tailwindcss";
+
+@theme {
+  /* === Typography === */
+  --font-sans: 'Vazirmatn', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Cinzel', 'Vazirmatn', serif;
+
+  /* === Gold accent palette === */
+  --color-gold-50: #fffaeb;
+  --color-gold-100: #fff1c7;
+  --color-gold-200: #ffe18a;
+  --color-gold-300: #ffcb4d;
+  --color-gold-400: #ffb524;
+  --color-gold-500: #f59e0b;
+  --color-gold-600: #d97706;
+  --color-gold-700: #b45309;
+  --color-gold-800: #92400e;
+  --color-gold-900: #78350f;
+
+  /* === Navy blue (secondary accent for variety) === */
+  --color-navy-50: #f0f4fa;
+  --color-navy-100: #d6e0ee;
+  --color-navy-300: #6f8cb8;
+  --color-navy-500: #2c4670;
+  --color-navy-700: #1a2a4a;
+  --color-navy-900: #0a1428;
+
+  /* === Neutral / Ink palette (luxury charcoal to white) === */
+  --color-ink-50: #f7f7f8;
+  --color-ink-100: #ededf0;
+  --color-ink-200: #d8d8de;
+  --color-ink-300: #b4b4bf;
+  --color-ink-400: #888896;
+  --color-ink-500: #6b6b78;
+  --color-ink-600: #4d4d57;
+  --color-ink-700: #34343c;
+  --color-ink-800: #1f1f25;
+  --color-ink-850: #16161b;
+  --color-ink-900: #0d0d11;
+  --color-ink-950: #06060a;
+}
+
+/* ==============================================
+   GLOBAL FOUNDATION
+   ============================================== */
+html {
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #06060a;
+  color: #ededf0;
+  font-family: 'Vazirmatn', 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background:
+    radial-gradient(1400px 900px at 90% -10%, rgba(245, 158, 11, 0.05), transparent 65%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(44, 70, 112, 0.06), transparent 65%),
+    linear-gradient(180deg, #06060a 0%, #0d0d11 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+html.light, html.light body {
+  background:
+    radial-gradient(1400px 900px at 90% -10%, rgba(180, 83, 9, 0.08), transparent 60%),
+    linear-gradient(180deg, #fafaf7 0%, #f1ece1 100%);
+  color: #1f1f25;
+}
+
+/* ==============================================
+   TYPOGRAPHY HIERARCHY (Persian-optimized)
+   ============================================== */
+* {
+  font-family: 'Vazirmatn', 'Inter', sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+}
+h1 { font-weight: 800; }
+p { line-height: 1.85; }
+small, .text-xs { line-height: 1.7; }
+
+/* Numeric tabular (for stats) */
+.num, .font-mono {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* Display font (Cinzel) for English brand only */
+.font-display {
+  font-family: 'Cinzel', 'Vazirmatn', serif;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+/* ==============================================
+   SCROLLBAR — minimalist luxury
+   ============================================== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.22);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.45); }
+html.light ::-webkit-scrollbar-thumb { background: rgba(180, 83, 9, 0.22); }
+* { scrollbar-width: thin; scrollbar-color: rgba(245, 158, 11, 0.3) transparent; }
+
+/* ==============================================
+   GOLD GRADIENT TEXT
+   ============================================== */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #fff1c7 0%, #ffcb4d 25%, #d97706 60%, #fff1c7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+}
+
+/* ==============================================
+   SURFACES — luxury cards with refined glass effect
+   ============================================== */
+.surface {
+  background: linear-gradient(180deg, rgba(31, 31, 37, 0.72) 0%, rgba(13, 13, 17, 0.88) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.08);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.025) inset,
+    0 30px 60px -20px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  border-radius: 14px;
+}
+.surface:hover {
+  border-color: rgba(245, 158, 11, 0.18);
+}
+
+html.light .surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 243, 0.95) 100%);
+  border: 1px solid rgba(180, 83, 9, 0.10);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 40px -16px rgba(120, 80, 0, 0.08);
+}
+
+.surface-soft {
+  background: rgba(22, 22, 27, 0.5);
+  border: 1px solid rgba(245, 158, 11, 0.06);
+  transition: all 0.25s ease;
+  border-radius: 12px;
+}
+.surface-soft:hover { border-color: rgba(245, 158, 11, 0.12); }
+html.light .surface-soft {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(180, 83, 9, 0.08);
+}
+
+/* Gold luxury ring */
+.ring-gold {
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.28),
+    0 14px 40px -10px rgba(245, 158, 11, 0.12),
+    inset 0 1px 0 rgba(255, 241, 199, 0.08);
+}
+
+.gold-glow {
+  box-shadow: 0 0 36px -8px rgba(245, 158, 11, 0.55);
+}
+
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.35), transparent);
+}
+
+/* Interactive card with hover lift */
+.card-clickable {
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
+}
+.card-clickable:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 158, 11, 0.30);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 20px 50px -16px rgba(245, 158, 11, 0.15),
+    0 30px 60px -20px rgba(0, 0, 0, 0.6);
+}
+.card-clickable:active { transform: translateY(-1px); }
+
+/* ==============================================
+   BUTTONS — luxury gold style
+   ============================================== */
+.btn-gold {
+  background: linear-gradient(135deg, #fff1c7 0%, #ffb524 32%, #b45309 100%);
+  color: #0d0d11;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  border: 1px solid rgba(180, 83, 9, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 8px -2px rgba(245, 158, 11, 0.25);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 12px 28px -8px rgba(245, 158, 11, 0.5);
+}
+.btn-gold:active { transform: translateY(0); }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+.btn-ghost-gold {
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: #ffcb4d;
+  background: rgba(245, 158, 11, 0.04);
+  font-weight: 500;
+  transition: all 0.22s ease;
+}
+.btn-ghost-gold:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #ffe18a;
+}
+
+/* Navy secondary button */
+.btn-navy {
+  background: linear-gradient(135deg, #6f8cb8 0%, #2c4670 50%, #1a2a4a 100%);
+  color: #fff;
+  font-weight: 600;
+  border: 1px solid rgba(26, 42, 74, 0.6);
+  transition: all 0.22s ease;
+}
+.btn-navy:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -8px rgba(44, 70, 112, 0.5);
+}
+
+/* ==============================================
+   INPUTS — luxury minimalist
+   ============================================== */
+.input-dark {
+  background: rgba(13, 13, 17, 0.55);
+  border: 1px solid rgba(245, 158, 11, 0.12);
+  color: #ededf0;
+  border-radius: 10px;
+  padding: 0.65rem 0.95rem;
+  width: 100%;
+  outline: none;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 0.875rem;
+  transition: all 0.18s ease;
+}
+.input-dark::placeholder { color: rgba(180, 180, 191, 0.5); }
+.input-dark:hover { border-color: rgba(245, 158, 11, 0.24); }
+.input-dark:focus {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(13, 13, 17, 0.85);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.10);
+}
+html.light .input-dark {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f1f25;
+  border-color: rgba(180, 83, 9, 0.18);
+}
+html.light .input-dark::placeholder { color: rgba(107, 107, 120, 0.6); }
+html.light .input-dark:focus { background: #fff; border-color: rgba(180, 83, 9, 0.5); }
+
+/* ==============================================
+   PILLS / BADGES
+   ============================================== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.24rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+/* ==============================================
+   ANIMATIONS — subtle & elegant
+   ============================================== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.18), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+}
+.pulse-gold { animation: pulse-gold 2.5s infinite; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float-slow { animation: float-slow 5s ease-in-out infinite; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.4s ease-out; }
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right { animation: slide-in-right 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ==============================================
+   FORM-CONTROL DEFAULTS
+   ============================================== */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+input[type="checkbox"], input[type="radio"] { accent-color: #f59e0b; }
+
+::selection { background: rgba(245, 158, 11, 0.3); color: #ffe18a; }
+
+*:focus-visible {
+  outline: 2px solid rgba(245, 158, 11, 0.55);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ==============================================
+   PRINT
+   ============================================== */
+@media print {
+  body { background: white !important; color: black !important; }
+  .no-print { display: none !important; }
+  .surface, .surface-soft { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+  .text-gold-gradient { color: #7a4a00 !important; -webkit-text-fill-color: #7a4a00 !important; }
+}
+
+/* ==============================================
+   REDUCED MOTION
+   ============================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==============================================
+   GLASS EFFECT
+   ============================================== */
+.glass {
+  background: rgba(13, 13, 17, 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+html.light .glass {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}

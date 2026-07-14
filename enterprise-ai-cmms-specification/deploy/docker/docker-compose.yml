@@ -1,0 +1,98 @@
+# =====================================================
+# 🐳 Baspar CMMS - Docker Compose (Production)
+# =====================================================
+# اجرای همه سرویس‌ها با یک دستور:
+#   docker compose up -d
+#
+# سرویس‌ها:
+#   - postgres: دیتابیس PostgreSQL 15
+#   - backend:  API سرور Node.js (پورت 3000)
+#   - frontend: Nginx serve کردن dist/ (پورت 80)
+# =====================================================
+
+services:
+  # -------------- PostgreSQL --------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: baspar-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: baspar_cmms
+      POSTGRES_USER: baspar_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-BasparStrongPass2025!}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C.UTF-8"
+      TZ: Asia/Tehran
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database:/docker-entrypoint-initdb.d:ro  # auto-runs .sql files on first boot
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U baspar_user -d baspar_cmms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------- Backend API --------------
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: baspar-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: baspar_cmms
+      DB_USER: baspar_user
+      DB_PASSWORD: ${DB_PASSWORD:-BasparStrongPass2025!}
+      JWT_SECRET: ${JWT_SECRET:-CHANGE_ME_TO_RANDOM_64_CHAR_STRING_FOR_PRODUCTION}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      TZ: Asia/Tehran
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # -------------- Frontend (Nginx) --------------
+  frontend:
+    image: nginx:alpine
+    container_name: baspar-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro     # place your built dist/ folder here
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"      # for future HTTPS
+    environment:
+      TZ: Asia/Tehran
+
+  # -------------- Optional: Adminer for DB management --------------
+  adminer:
+    image: adminer:latest
+    container_name: baspar-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: baspar-network
