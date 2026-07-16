@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { AppStateProvider } from "@/context/AppStateContext";
 import { WorkOrdersProvider } from "@/context/WorkOrdersContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "سامانه هوشمند نت‌سلن | CMMS/EAM",
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </AppStateProvider>
           </ToastProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
