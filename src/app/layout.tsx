@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AppStateProvider } from "@/context/AppStateContext";
+import { WorkOrdersProvider } from "@/context/WorkOrdersContext";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
@@ -46,7 +47,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeProvider>
           <ToastProvider>
             <AppStateProvider>
-              {children}
+              <WorkOrdersProvider>
+                {children}
+              </WorkOrdersProvider>
             </AppStateProvider>
           </ToastProvider>
         </ThemeProvider>

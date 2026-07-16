@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { MaintenancePlan, MaintenanceType, TriggerType, Standard, ChecklistItem } from "@/lib/maintenance-data";
 import { X, Sparkles } from "lucide-react";
 import { ChecklistBuilder } from "./ChecklistBuilder";
+import { useToast } from "@/components/ui/Toast";
 
 interface Props {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function PMFormAdvanced({ isOpen, onClose, initialData }: Props) {
+  const toast = useToast();
   const [tab, setTab] = useState<"info" | "trigger" | "checklist" | "parts">("info");
   const [formData, setFormData] = useState<Partial<MaintenancePlan>>({
     title: "",
@@ -362,8 +364,14 @@ export function PMFormAdvanced({ isOpen, onClose, initialData }: Props) {
         <div className="p-4 border-t border-gray-200 dark:border-[#1a1a1a] flex gap-2">
           <button onClick={onClose} className="btn-secondary flex-1 justify-center">انصراف</button>
           <button
-            onClick={() => { console.log(formData); onClose(); }}
-            disabled={!formData.title || !formData.assetId}
+            onClick={() => {
+              toast.success(
+                initialData ? "PM ویرایش شد" : "PM جدید ایجاد شد",
+                `«${formData.title}» با موفقیت ${initialData ? "به‌روز" : "ثبت"} شد`
+              );
+              onClose();
+            }}
+            disabled={!formData.title}
             className="btn-primary flex-1 justify-center disabled:opacity-40"
           >
             {initialData ? "ذخیره تغییرات" : "ایجاد PM"}

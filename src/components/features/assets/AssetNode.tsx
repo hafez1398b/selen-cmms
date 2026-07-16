@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown, ChevronLeft } from "lucide-react";
-import { assetTypes, type AssetNode as AssetNodeType } from "@/lib/assets-data";
+import { ChevronDown, ChevronLeft, Edit2 } from "lucide-react";
+import { assetTypes, isStructural, type AssetNode as AssetNodeType } from "@/lib/assets-data";
 import type { AssetTreeNode } from "@/hooks/useAssetTree";
 import { AssetActions } from "./AssetActions";
 
@@ -188,7 +188,16 @@ export function AssetNode({
         style={{ backgroundColor: health }}
       />
 
-      {/* Actions */}
+      {/* Quick Edit Button (always visible on hover) */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+        className="p-1.5 rounded-lg hover:bg-amber-500/20 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+        title="ویرایش سریع"
+      >
+        <Edit2 className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Actions Menu */}
       <div onClick={(e) => e.stopPropagation()}>
         <AssetActions
           asset={node}

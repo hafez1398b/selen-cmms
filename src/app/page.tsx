@@ -18,6 +18,7 @@ import { SettingsPage } from "@/components/pages/SettingsPage";
 import { KPIPage } from "@/components/pages/KPIPage";
 import { PlanningPage } from "@/components/pages/PlanningPage";
 import { DocsViewer } from "@/components/pages/DocsViewer";
+import { MigrationPage } from "@/components/pages/MigrationPage";
 import { ModalContainer } from "@/components/ui/Modal";
 import { NotificationPanel } from "@/components/layout/NotificationPanel";
 import { LoginModal } from "@/components/features/auth/LoginModal";
@@ -48,6 +49,7 @@ export default function Home() {
       case "kpi": return <KPIPage />;
       case "planning": return <PlanningPage />;
       case "docs": return <DocsViewer />;
+      case "migration": return <MigrationPage />;
       default: return <DashboardPage />;
     }
   };

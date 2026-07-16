@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Sparkles } from "lucide-react";
-import { assetTypes, type AssetTypeKey, type AssetNode, assetsTreeData } from "@/lib/assets-data";
+import { WizardForm, OptionCards, InputField, TextareaField, type WizardStep } from "@/components/ui/WizardForm";
+import { SmartSelectList } from "@/components/ui/SmartSelectList";
+import { assetTypes, assetCategories, type AssetTypeKey, type AssetNode, type CategoryKey, assetsTreeData } from "@/lib/assets-data";
+import { Sparkles } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
@@ -14,272 +15,248 @@ interface Props {
 }
 
 export function AssetFormAdvanced({ isOpen, onClose, onSave, initialData, parentId, mode }: Props) {
-  const [formData, setFormData] = useState<Partial<AssetNode>>({
-    name: "",
-    code: "",
-    typeKey: "equipment",
-    parentId: parentId ?? null,
-    status: "active",
-    healthScore: 100,
-    criticality: "medium",
-    manufacturer: "",
-    model: "",
-    serialNumber: "",
-  });
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({ ...initialData });
-    } else {
-      setFormData({
-        name: "",
-        code: "",
-        typeKey: "equipment",
-        parentId: parentId ?? null,
-        status: "active",
-        healthScore: 100,
-        criticality: "medium",
-      });
-    }
-  }, [initialData, parentId, isOpen]);
+  const steps: WizardStep[] = [
+    // Step 1: Category (دسته‌بندی رسمی)
+    {
+      id: "category",
+      title: "کدام دسته تجهیز؟",
+      subtitle: "دسته اصلی تجهیز را انتخاب کنید",
+      icon: "📂",
+      validate: (data) => !data.category ? "لطفاً یک دسته انتخاب کنید" : null,
+      render: ({ data, setData }) => (
+        <OptionCards
+          columns={3}
+          value={data.category}
+          onChange={(v: any) => setData({ category: v })}
+          options={(Object.entries(assetCategories) as [CategoryKey, typeof assetCategories[CategoryKey]][]).map(([k, c]) => ({
+            value: k, label: c.label, icon: c.icon, color: c.color, description: c.description,
+          }))}
+        />
+      ),
+    },
 
-  if (!isOpen) return null;
+    // Step 2: Type Key
+    {
+      id: "typeKey",
+      title: "نوع تجهیز چیست؟",
+      subtitle: "سطح تجهیز در سلسله مراتب",
+      icon: "⚙️",
+      validate: (data) => !data.typeKey ? "لطفاً نوع را انتخاب کنید" : null,
+      render: ({ data, setData }) => (
+        <OptionCards
+          columns={2}
+          value={data.typeKey}
+          onChange={(v: any) => setData({ typeKey: v })}
+          options={[
+            { value: "equipment", label: "تجهیز", icon: "⚙️", description: "دستگاه اصلی مانند میکسر، پرس" },
+            { value: "subsystem", label: "زیرسیستم", icon: "🔧", description: "بخشی از یک تجهیز (موتور، پمپ)" },
+            { value: "part", label: "قطعه", icon: "🔩", description: "قطعه مانند بلبرینگ، فیلتر" },
+            { value: "subpart", label: "زیرقطعه", icon: "🔗", description: "زیرقطعه کوچک‌تر" },
+          ]}
+        />
+      ),
+    },
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.code) return;
-    onSave(formData as Omit<AssetNode, "id" | "path" | "level">);
-    onClose();
-  };
+    // Step 3: Parent
+    {
+      id: "parentId",
+      title: "این تجهیز زیرمجموعه کدام است؟",
+      subtitle: "والد را انتخاب کنید (یا بدون والد)",
+      icon: "🌳",
+      render: ({ data, setData }) => {
+        const parents = assetsTreeData.filter(a =>
+          data.typeKey === "equipment" ? a.typeKey === "category" :
+          data.typeKey === "subsystem" ? a.typeKey === "equipment" :
+          data.typeKey === "part" ? ["equipment", "subsystem"].includes(a.typeKey) :
+          true
+        );
+        return (
+          <div className="space-y-3">
+            <button
+              onClick={() => setData({ parentId: null })}
+              className={`w-full p-3 rounded-xl border-2 text-right ${data.parentId === null ? 'border-amber-500 bg-amber-500/10' : 'border-gray-200 dark:border-[#1a1a1a]'}`}
+            >
+              <p className="text-sm font-bold">بدون والد (ریشه)</p>
+              <p className="text-[10px] text-gray-500">به‌عنوان ریشه در درخت قرار می‌گیرد</p>
+            </button>
+            <SmartSelectList
+              options={parents.map(p => ({
+                value: String(p.id),
+                label: p.name,
+                description: `${p.code} • ${assetTypes[p.typeKey].label}`,
+                icon: assetTypes[p.typeKey].icon,
+              }))}
+              value={data.parentId !== null ? String(data.parentId) : ""}
+              onChange={(v) => setData({ parentId: v ? Number(v) : null })}
+              storageKey={`asset_parent_${data.typeKey}`}
+              placeholder="جستجوی والد..."
+              addLabel="افزودن والد جدید"
+              customItemsEditable={false}
+            />
+          </div>
+        );
+      },
+    },
 
-  const parentAsset = formData.parentId ? assetsTreeData.find(a => a.id === formData.parentId) : null;
+    // Step 4: Basic Info
+    {
+      id: "basic",
+      title: "اطلاعات پایه",
+      subtitle: "کد و نام تجهیز",
+      icon: "🏷️",
+      validate: (data) => {
+        if (!data.name) return "نام تجهیز الزامی است";
+        if (!data.code) return "کد تجهیز الزامی است";
+        return null;
+      },
+      render: ({ data, setData }) => (
+        <div className="space-y-3">
+          <InputField
+            label="نام تجهیز *"
+            value={data.name || ""}
+            onChange={v => setData({ name: v })}
+            placeholder="مثال: میکسر اصلی"
+          />
+          <InputField
+            label="کد تجهیز *"
+            value={data.code || ""}
+            onChange={v => setData({ code: v })}
+            placeholder="مثال: MX-101"
+            dir="ltr"
+          />
+          <InputField
+            label="نام انگلیسی (اختیاری)"
+            value={data.nameEn || ""}
+            onChange={v => setData({ nameEn: v })}
+            placeholder="Main Mixer"
+            dir="ltr"
+          />
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 flex items-start gap-2">
+            <Sparkles className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-gray-600 dark:text-gray-400">
+              کد تجهیز باید یکتا باشد و طبق استاندارد سلن نوشته شود (مثال: <strong dir="ltr">MX-101</strong>)
+            </p>
+          </div>
+        </div>
+      ),
+    },
 
-  // Auto-suggest type based on parent
-  const suggestChildType = (parentType?: AssetTypeKey): AssetTypeKey => {
-    const chain: AssetTypeKey[] = ["company", "plant", "bespar", "location", "category", "equipment", "subsystem", "part", "subpart"];
-    if (!parentType) return "company";
-    const idx = chain.indexOf(parentType);
-    return chain[Math.min(idx + 1, chain.length - 1)];
-  };
+    // Step 5: Manufacturer & Model
+    {
+      id: "specs",
+      title: "مشخصات فنی",
+      subtitle: "سازنده، مدل، سریال (اختیاری)",
+      icon: "🏭",
+      render: ({ data, setData }) => (
+        <div className="space-y-3">
+          <InputField label="سازنده" value={data.manufacturer || ""} onChange={v => setData({ manufacturer: v })} placeholder="مثال: Cannon، Siemens، ABB" />
+          <InputField label="مدل" value={data.model || ""} onChange={v => setData({ model: v })} placeholder="A80" dir="ltr" />
+          <InputField label="شماره سریال" value={data.serialNumber || ""} onChange={v => setData({ serialNumber: v })} placeholder="SN-2019-4521" dir="ltr" />
+          <div className="grid grid-cols-2 gap-3">
+            <InputField label="سال ساخت" value={data.yearManufactured || ""} onChange={v => setData({ yearManufactured: Number(v) || undefined })} type="number" placeholder="2019" />
+            <InputField label="سال نصب" value={data.yearInstalled || ""} onChange={v => setData({ yearInstalled: Number(v) || undefined })} type="number" placeholder="1398" />
+          </div>
+          <InputField label="موقعیت / محل نصب" value={data.location || ""} onChange={v => setData({ location: v })} placeholder="سالن تولید، ردیف A" />
+        </div>
+      ),
+    },
 
-  const suggestedType = parentAsset ? suggestChildType(parentAsset.typeKey) : "company";
+    // Step 6: Status
+    {
+      id: "status",
+      title: "وضعیت فعلی",
+      subtitle: "وضعیت عملیاتی تجهیز",
+      icon: "🚦",
+      validate: (data) => !data.status ? "لطفاً وضعیت را انتخاب کنید" : null,
+      render: ({ data, setData }) => (
+        <OptionCards
+          columns={2}
+          value={data.status}
+          onChange={(v: any) => setData({ status: v })}
+          options={[
+            { value: "active", label: "فعال", icon: "✅", color: "#22c55e", description: "در حال کار عادی" },
+            { value: "maintenance", label: "در تعمیر", icon: "🔧", color: "#f59e0b", description: "در حال نگهداری یا تعمیر" },
+            { value: "inactive", label: "غیرفعال", icon: "⏸️", color: "#6b7280", description: "متوقف / خارج از سرویس" },
+            { value: "failed", label: "خراب", icon: "❌", color: "#ef4444", description: "دچار خرابی" },
+          ]}
+        />
+      ),
+    },
+
+    // Step 7: Criticality
+    {
+      id: "criticality",
+      title: "درجه بحرانیت",
+      subtitle: "چقدر برای تولید مهم است؟",
+      icon: "⚠️",
+      validate: (data) => !data.criticality ? "لطفاً بحرانیت را انتخاب کنید" : null,
+      render: ({ data, setData }) => (
+        <OptionCards
+          columns={2}
+          value={data.criticality}
+          onChange={(v: any) => setData({ criticality: v })}
+          options={[
+            { value: "low", label: "کم", icon: "🟢", color: "#22c55e", description: "خرابی تاثیر کم دارد" },
+            { value: "medium", label: "متوسط", icon: "🔵", color: "#3b82f6", description: "خرابی تاثیر متوسط" },
+            { value: "high", label: "بالا", icon: "🟠", color: "#f59e0b", description: "خرابی تاثیر جدی" },
+            { value: "critical", label: "بحرانی", icon: "🔴", color: "#ef4444", description: "خرابی توقف تولید" },
+          ]}
+        />
+      ),
+    },
+
+    // Step 8: Health Score
+    {
+      id: "healthScore",
+      title: "امتیاز سلامت فعلی",
+      subtitle: "بین ۰ تا ۱۰۰ (پیش‌فرض ۱۰۰)",
+      icon: "💚",
+      render: ({ data, setData }) => (
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-5xl font-black" style={{ color: (data.healthScore || 100) >= 85 ? '#22c55e' : (data.healthScore || 100) >= 70 ? '#f59e0b' : '#ef4444' }}>
+              {data.healthScore || 100}%
+            </p>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={data.healthScore || 100}
+            onChange={e => setData({ healthScore: Number(e.target.value) })}
+            className="w-full accent-amber-500"
+          />
+          <div className="flex justify-between text-[10px] text-gray-500">
+            <span>🔴 خراب</span>
+            <span>🟡 متوسط</span>
+            <span>🟢 سالم</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[100, 85, 70].map(v => (
+              <button key={v} onClick={() => setData({ healthScore: v })} className="p-2 rounded-lg border border-gray-200 dark:border-[#1a1a1a] text-xs">
+                {v}%
+              </button>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-end md:items-center justify-center md:p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative w-full md:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#111] md:rounded-2xl rounded-t-2xl border border-gray-200 dark:border-[#1a1a1a] shadow-2xl animate-fade-in"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="md:hidden flex justify-center pt-2">
-          <div className="w-10 h-1 bg-gray-300 dark:bg-[#333] rounded-full" />
-        </div>
-
-        {/* Header */}
-        <div className="p-4 md:p-5 border-b border-gray-200 dark:border-[#1a1a1a] flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-amber-600 dark:text-amber-500 text-base md:text-lg">
-              {mode === "add" ? "افزودن تجهیز جدید" : "ویرایش تجهیز"}
-            </h3>
-            {parentAsset && (
-              <p className="text-[10px] text-gray-500 mt-0.5">
-                زیرمجموعه: {parentAsset.name}
-              </p>
-            )}
-          </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a]">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-4 md:p-5 space-y-4">
-          {/* Type Selection */}
-          <div>
-            <label className="text-xs font-bold mb-2 block">نوع تجهیز <span className="text-red-500">*</span></label>
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5">
-              {Object.entries(assetTypes).map(([key, info]) => (
-                <button
-                  key={key}
-                  onClick={() => setFormData({ ...formData, typeKey: key as AssetTypeKey })}
-                  className={`p-2 rounded-lg border text-center transition-all ${
-                    formData.typeKey === key
-                      ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-500'
-                      : 'border-gray-200 dark:border-[#1a1a1a] text-gray-500'
-                  }`}
-                >
-                  <div className="text-lg">{info.icon}</div>
-                  <div className="text-[9px] mt-0.5">{info.label}</div>
-                </button>
-              ))}
-            </div>
-            {suggestedType !== formData.typeKey && parentAsset && (
-              <p className="text-[10px] text-amber-500 mt-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                پیشنهاد AI: <strong>{assetTypes[suggestedType].label}</strong>
-              </p>
-            )}
-          </div>
-
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">نام <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="مثال: میکسر اصلی"
-                value={formData.name || ""}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">کد <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="مثال: MX-101"
-                value={formData.code || ""}
-                onChange={e => setFormData({ ...formData, code: e.target.value })}
-                dir="ltr"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">سازنده</label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="Siemens, ABB, ..."
-                value={formData.manufacturer || ""}
-                onChange={e => setFormData({ ...formData, manufacturer: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">مدل</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.model || ""}
-                onChange={e => setFormData({ ...formData, model: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">شماره سریال</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.serialNumber || ""}
-                onChange={e => setFormData({ ...formData, serialNumber: e.target.value })}
-                dir="ltr"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">سال ساخت</label>
-              <input
-                type="number"
-                className="input-field"
-                placeholder="2020"
-                value={formData.yearManufactured || ""}
-                onChange={e => setFormData({ ...formData, yearManufactured: Number(e.target.value) })}
-              />
-            </div>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">موقعیت نصب</label>
-            <input
-              type="text"
-              className="input-field"
-              placeholder="سالن تولید ۱، ردیف A"
-              value={formData.location || ""}
-              onChange={e => setFormData({ ...formData, location: e.target.value })}
-            />
-          </div>
-
-          {/* Status & Criticality */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-2 block">وضعیت</label>
-              <div className="flex flex-wrap gap-1">
-                {[
-                  { v: "active", l: "فعال", c: "#22c55e" },
-                  { v: "maintenance", l: "تعمیر", c: "#f59e0b" },
-                  { v: "inactive", l: "غیرفعال", c: "#6b7280" },
-                  { v: "failed", l: "خراب", c: "#ef4444" },
-                ].map(o => (
-                  <button
-                    key={o.v}
-                    onClick={() => setFormData({ ...formData, status: o.v as any })}
-                    className="text-[10px] px-2 py-1 rounded-lg border transition-all"
-                    style={{
-                      borderColor: formData.status === o.v ? o.c : "#e5e7eb",
-                      backgroundColor: formData.status === o.v ? o.c + '18' : "transparent",
-                      color: formData.status === o.v ? o.c : "#6b7280",
-                      fontWeight: formData.status === o.v ? 700 : 400,
-                    }}
-                  >
-                    {o.l}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-2 block">بحرانیت</label>
-              <div className="flex flex-wrap gap-1">
-                {[
-                  { v: "low", l: "کم", c: "#22c55e" },
-                  { v: "medium", l: "متوسط", c: "#3b82f6" },
-                  { v: "high", l: "بالا", c: "#f59e0b" },
-                  { v: "critical", l: "بحرانی", c: "#ef4444" },
-                ].map(o => (
-                  <button
-                    key={o.v}
-                    onClick={() => setFormData({ ...formData, criticality: o.v as any })}
-                    className="text-[10px] px-2 py-1 rounded-lg border transition-all"
-                    style={{
-                      borderColor: formData.criticality === o.v ? o.c : "#e5e7eb",
-                      backgroundColor: formData.criticality === o.v ? o.c + '18' : "transparent",
-                      color: formData.criticality === o.v ? o.c : "#6b7280",
-                      fontWeight: formData.criticality === o.v ? 700 : 400,
-                    }}
-                  >
-                    {o.l}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Health Score */}
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">
-              امتیاز سلامت: <strong className="text-amber-500">{formData.healthScore}%</strong>
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={formData.healthScore || 100}
-              onChange={e => setFormData({ ...formData, healthScore: Number(e.target.value) })}
-              className="w-full accent-amber-500"
-            />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 md:p-5 border-t border-gray-200 dark:border-[#1a1a1a] flex gap-2">
-          <button onClick={onClose} className="btn-secondary flex-1 justify-center">
-            انصراف
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!formData.name || !formData.code}
-            className="btn-primary flex-1 justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {mode === "add" ? "افزودن" : "ذخیره تغییرات"}
-          </button>
-        </div>
-      </div>
-    </div>
+    <WizardForm
+      isOpen={isOpen}
+      onClose={onClose}
+      title={mode === "add" ? "افزودن تجهیز جدید" : "ویرایش تجهیز"}
+      subtitle="فرآیند گام به گام با راهنمای هوشمند"
+      gradient="from-amber-500 to-amber-700"
+      steps={steps}
+      initialData={initialData || { status: "active", criticality: "medium", healthScore: 100, parentId: parentId ?? null }}
+      completionMessage={mode === "add" ? "تجهیز با موفقیت افزوده شد" : "تغییرات ذخیره شد"}
+      onComplete={(data) => {
+        onSave(data as Omit<AssetNode, "id" | "path" | "level">);
+      }}
+    />
   );
 }

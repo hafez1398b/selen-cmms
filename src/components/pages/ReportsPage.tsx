@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import * as XLSX from "xlsx";
 import { assetsTreeData } from "@/lib/assets-data";
 import { maintenancePlansData } from "@/lib/maintenance-data";
 import { personnelData } from "@/lib/personnel-data";
@@ -30,8 +29,9 @@ export function ReportsPage() {
 
   const currentReport = reports.find(r => r.id === selected)!;
 
-  // Export to Excel
-  const exportExcel = () => {
+  // Export to Excel (dynamic import to avoid SSR issues)
+  const exportExcel = async () => {
+    const XLSX = await import("xlsx");
     let data: any[] = [];
     let filename = "report";
 

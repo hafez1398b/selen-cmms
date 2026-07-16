@@ -34,6 +34,7 @@ export function TopHeader() {
     kpi: "شاخص‌های KPI",
     planning: "مرکز برنامه‌ریزی",
     docs: "مستندات معماری",
+    migration: "مرکز مهاجرت اطلاعات",
   };
 
   return (

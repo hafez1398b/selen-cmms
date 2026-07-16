@@ -2,9 +2,16 @@
 
 import { assetsData, workOrdersData, failuresData, pmData, getStatusBadge, formatNumber } from "@/lib/data";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { Wrench, AlertTriangle, ClipboardList, Package, Activity, TrendingUp, TrendingDown } from "lucide-react";
+import { Wrench, AlertTriangle, ClipboardList, Package, Activity, TrendingUp, TrendingDown, ChevronLeft } from "lucide-react";
+import { useAppState, type PageId } from "@/context/AppStateContext";
 
 export function DashboardPage() {
+  const { setCurrentPage, setSelectedItem } = useAppState();
+
+  const navigateWithFilter = (page: PageId, filter?: Record<string, any>) => {
+    setSelectedItem(filter || null);
+    setCurrentPage(page);
+  };
 
   const openOrders = workOrdersData.filter(w => w.status === "open").length;
   const inProgressOrders = workOrdersData.filter(w => w.status === "in_progress").length;
@@ -14,13 +21,13 @@ export function DashboardPage() {
 
   const avgHealth = Math.round(assetsData.reduce((s, a) => s + Number(a.healthScore), 0) / assetsData.length);
 
-  const kpiCards = [
-    { title: "میانگین سلامت", value: "۸۹", unit: "%", icon: Activity, color: "#d4a017", trend: "۲.۳", trendUp: true },
-    { title: "تطابق PM", value: "۹۵", unit: "%", icon: ClipboardList, color: "#22c55e", trend: "۱.۵", trendUp: true },
-    { title: "دستور کار باز", value: `${openOrders}`, unit: "", icon: ClipboardList, color: "#3b82f6", trend: "۳", trendUp: false },
-    { title: "معوق", value: `${overduePM}`, unit: "", icon: AlertTriangle, color: "#ef4444", trend: "۲.۱", trendUp: false },
-    { title: "تجهیز بحرانی", value: "۲", unit: "", icon: AlertTriangle, color: "#f59e0b", trend: "۰.۵", trendUp: false },
-    { title: "کمبود انبار", value: "۳", unit: "", icon: Package, color: "#8b5cf6", trend: "۱", trendUp: true },
+  const kpiCards: Array<{ title: string; value: string; unit: string; icon: any; color: string; trend: string; trendUp: boolean; page: PageId; filter?: Record<string, any> }> = [
+    { title: "میانگین سلامت", value: "۸۹", unit: "%", icon: Activity, color: "#d4a017", trend: "۲.۳", trendUp: true, page: "assets" },
+    { title: "تطابق PM", value: "۹۵", unit: "%", icon: ClipboardList, color: "#22c55e", trend: "۱.۵", trendUp: true, page: "maintenance" },
+    { title: "دستور کار باز", value: `${openOrders}`, unit: "", icon: ClipboardList, color: "#3b82f6", trend: "۳", trendUp: false, page: "workOrders", filter: { filterStatus: "open" } },
+    { title: "معوق", value: `${overduePM}`, unit: "", icon: AlertTriangle, color: "#ef4444", trend: "۲.۱", trendUp: false, page: "maintenance", filter: { filterStatus: "overdue" } },
+    { title: "تجهیز بحرانی", value: "۲", unit: "", icon: AlertTriangle, color: "#f59e0b", trend: "۰.۵", trendUp: false, page: "assets", filter: { filterCriticality: "critical" } },
+    { title: "کمبود انبار", value: "۳", unit: "", icon: Package, color: "#8b5cf6", trend: "۱", trendUp: true, page: "inventory", filter: { filterStatus: "low_stock" } },
   ];
 
   const woByStatus = [
@@ -78,12 +85,16 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards - 2 columns on mobile, 6 on desktop */}
+      {/* KPI Cards - Clickable navigation */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
         {kpiCards.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <div key={i} className="kpi-card !p-3 md:!p-4">
+            <button
+              key={i}
+              onClick={() => navigateWithFilter(kpi.page, kpi.filter)}
+              className="kpi-card !p-3 md:!p-4 card-hover text-right group cursor-pointer w-full"
+            >
               <div className="flex items-start justify-between mb-2">
                 <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl flex items-center justify-center" style={{ backgroundColor: kpi.color + '18' }}>
                   <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ color: kpi.color }} />
@@ -94,10 +105,13 @@ export function DashboardPage() {
                 </span>
               </div>
               <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-500 mb-0.5 truncate">{kpi.title}</p>
-              <p className="text-lg md:text-xl font-black" style={{ color: kpi.color }}>
-                {kpi.value}<span className="text-xs">{kpi.unit}</span>
-              </p>
-            </div>
+              <div className="flex items-center justify-between">
+                <p className="text-lg md:text-xl font-black" style={{ color: kpi.color }}>
+                  {kpi.value}<span className="text-xs">{kpi.unit}</span>
+                </p>
+                <ChevronLeft className="w-3 h-3 text-gray-400 group-hover:text-amber-500 group-hover:-translate-x-1 transition-all" />
+              </div>
+            </button>
           );
         })}
       </div>

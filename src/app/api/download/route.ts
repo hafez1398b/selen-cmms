@@ -4,7 +4,7 @@ import path from "path";
 
 export async function GET(req: NextRequest) {
   try {
-    const filePath = path.join(process.cwd(), "public", "downloads", "selen-cmms.zip");
+    const filePath = path.join(process.cwd(), "public", "downloads", "selen-cmms-v2.2.zip");
     const stats = await stat(filePath);
     const buffer = await readFile(filePath);
 
@@ -12,8 +12,9 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": 'attachment; filename="selen-cmms.zip"',
+        "Content-Disposition": 'attachment; filename="selen-cmms-v2.2.zip"',
         "Content-Length": stats.size.toString(),
+        "Cache-Control": "no-store",
       },
     });
   } catch (err) {

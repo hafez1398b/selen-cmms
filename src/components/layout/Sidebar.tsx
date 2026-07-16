@@ -4,7 +4,7 @@ import { useAppState, type PageId } from "@/context/AppStateContext";
 import {
   LayoutDashboard, Settings, Wrench, Users, Package,
   AlertTriangle, ClipboardList, FileText, Bot, ChevronRight,
-  TrendingUp, Calendar as CalendarIcon, X, Book
+  TrendingUp, Calendar as CalendarIcon, X, Book, Database
 } from "lucide-react";
 
 const menuGroups = [
@@ -24,6 +24,7 @@ const menuGroups = [
     title: "دارایی",
     items: [
       { id: "assets" as PageId, label: "درخت تجهیزات", icon: Settings },
+      { id: "migration" as PageId, label: "مرکز مهاجرت اطلاعات", icon: Database },
     ]
   },
   {

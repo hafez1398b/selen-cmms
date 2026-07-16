@@ -27,7 +27,7 @@ export function AssetMiniMap({ tree, onNavigate, focusedId }: Props) {
     return result;
   };
 
-  const topNodes = flattenTop(tree, 2); // Show up to bespar level
+  const topNodes = flattenTop(tree, 3); // Show up to location level
 
   return (
     <div className="chart-card !p-3">
