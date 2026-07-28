@@ -82,7 +82,7 @@ export function SmartImportGateway({ isOpen, onClose, onImportComplete }: Props)
       } else if (source === "pdf" || source === "image") {
         const result = source === "image" ? await extractFromImage(f) : await extractFromPDF(f);
         setOcrResult(result);
-        setEditedFields(result.extractedFields);
+        setEditedFields(result.extractedFields || {});
         setStep("review");
         toast.success("استخراج شد", `اطلاعات با ${result.confidence}% اطمینان استخراج شد`);
       }

@@ -139,7 +139,7 @@ export function PMTab({ assetId }: Props) {
             {Object.entries(pmTemplate.groups).map(([freq, activities]) => {
               const isExpanded = expandedFreq.has(freq);
               const color = freqColors[freq] || "#6b7280";
-              const totalMin = activities.reduce((s, a) => s + a.estimatedMinutes, 0);
+              const totalMin = activities.reduce((s, a) => s + (a.estimatedMinutes || 0), 0);
               return (
                 <div key={freq} className="border border-gray-200 dark:border-[#1a1a1a] rounded-lg overflow-hidden">
                   <button
